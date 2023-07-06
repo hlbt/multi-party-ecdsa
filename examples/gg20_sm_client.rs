@@ -26,11 +26,13 @@ where
         .await
         .context("subscribe")?
         .and_then(|msg| async move {
+            println!("join_computation and_then msg:{}", msg);
             serde_json::from_str::<Msg<M>>(&msg).context("deserialize message")
         });
 
     // Obtain party index
     let index = client.issue_index().await.context("issue an index")?;
+    println!("join_computation index:{}", index);
 
     // Ignore incoming messages addressed to someone else
     let incoming = incoming.try_filter(move |msg| {
@@ -38,10 +40,12 @@ where
             msg.sender != index && (msg.receiver.is_none() || msg.receiver == Some(index)),
         )
     });
+    println!("join_computation 2222");
 
     // Construct channel of outgoing messages
     let outgoing = futures::sink::unfold(client, |client, message: Msg<M>| async move {
         let serialized = serde_json::to_string(&message).context("serialize message")?;
+        println!("join_computation serialized:{}", serialized);
         client
             .broadcast(&serialized)
             .await
@@ -77,6 +81,7 @@ impl SmClient {
     }
 
     pub async fn broadcast(&self, message: &str) -> Result<()> {
+        println!("broadcast message:{}", message);
         self.http_client
             .post("broadcast")
             .body(message)
@@ -92,7 +97,7 @@ impl SmClient {
             .await
             .map_err(|e| e.into_inner())?;
         let events = async_sse::decode(response);
-        Ok(events.filter_map(|msg| async {
+        Ok(events.filter_map(|msg: std::result::Result<async_sse::Event, surf::Error>| async {
             match msg {
                 Ok(async_sse::Event::Message(msg)) => Some(
                     String::from_utf8(msg.into_bytes())

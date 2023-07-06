@@ -40,11 +40,13 @@ async fn subscribe(
 async fn issue_idx(db: &State<Db>, room_id: &str) -> Json<IssuedUniqueIdx> {
     let room = db.get_room_or_create_empty(room_id).await;
     let idx = room.issue_unique_idx();
+    println!("issue_unique_idx idx:{} room_id:{}", idx, room_id);
     Json::from(IssuedUniqueIdx { unique_idx: idx })
 }
 
 #[rocket::post("/rooms/<room_id>/broadcast", data = "<message>")]
 async fn broadcast(db: &State<Db>, room_id: &str, message: String) -> Status {
+    println!("broadcast room_id:{} message:{}", room_id, message);
     let room = db.get_room_or_create_empty(room_id).await;
     room.publish(message).await;
     Status::Ok
@@ -136,6 +138,7 @@ impl Subscription {
             if let Some(msg) = history.get(usize::from(self.next_event)) {
                 let event_id = self.next_event;
                 self.next_event = event_id + 1;
+                println!("next event_id:{} msg:{}", event_id, msg);
                 return (event_id, msg.clone());
             }
             let notification = self.room.message_appeared.notified();

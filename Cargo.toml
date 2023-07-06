@@ -23,7 +23,7 @@ license = "GPL-3.0-or-later"
 categories = ["cryptography"]
 
 [lib]
-crate-type = ["lib"]
+crate-type = ["dylib"]
 
 [features]
 default = ["curv-kzen/rust-gmp-kzen"]
@@ -40,6 +40,7 @@ round-based = { version = "0.1.4", features = [] }
 thiserror = "1.0.23"
 derivative = "2"
 sha2 = "0.9"
+jni-sys = "0.3.0"
 
 [dependencies.paillier]
 version = "0.4.2"
@@ -50,6 +51,9 @@ default-features = false
 version = "0.6"
 default-features = false
 optional = true
+
+[target.'cfg(target_os="android")'.dependencies]
+jni = { version = "0.5", default-features = false }
 
 [dev-dependencies]
 criterion = "0.3"
