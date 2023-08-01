@@ -43,6 +43,8 @@ pub mod android {
             .map_err(|e| anyhow!("protocol execution terminated with error: {}", e))?;
         let output = serde_json::to_vec_pretty(&output).context("serialize output")?;
 
-        output
+        let output = env.new_string(output).expect("Couldn't create java string!");
+
+        output.into_inner();
     }
 }
