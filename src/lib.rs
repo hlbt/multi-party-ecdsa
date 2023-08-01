@@ -21,8 +21,6 @@
 pub mod protocols;
 pub mod utilities;
 pub mod gg20_sm_client;
-pub mod gg20_signing;
-pub mod gg20_keygen;
 use std::fmt;
 
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
