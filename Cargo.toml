@@ -61,7 +61,7 @@ default-features = false
 optional = true
 
 [target.'cfg(target_os="android")'.dependencies]
-jni = { version = "0.5", default-features = false }
+jni = { version = "0.21.1", default-features = false }
 
 [dev-dependencies]
 criterion = "0.3"
