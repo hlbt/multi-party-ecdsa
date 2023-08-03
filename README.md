@@ -137,6 +137,12 @@ ROCKET_ENV=development ./target/release/examples/sm_manager
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md), in addition **the [Rust utilities wiki](https://github.com/KZen-networks/rust-utils/wiki) contains information on workflow and environment set-up**.
 
+## Build Android
+
+cargo build --target aarch64-linux-android --release --no-default-features --features curv-kzen/num-bigint
+cargo build --target armv7-linux-androideabi --release --no-default-features --features curv-kzen/num-bigint
+cargo build --target i686-linux-android  --release --no-default-features --features curv-kzen/num-bigint
+
 ## License
 
 Multi-party ECDSA is released under the terms of the GPL-3.0 license. See [LICENSE](LICENSE) for more information.

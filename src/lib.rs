@@ -20,6 +20,7 @@
 
 pub mod protocols;
 pub mod utilities;
+pub mod gg20_android;
 pub mod gg20_sm_client;
 use std::fmt;
 
