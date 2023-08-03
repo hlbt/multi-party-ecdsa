@@ -72,7 +72,7 @@ pub mod android {
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey call create_key_async address：{} room:{} index:{} threshold:{} number_of_parties:{}", address, room, index, threshold, number_of_parties);
         let task = create_key_async(address, room.to_string(), index, threshold, number_of_parties);
         let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
-        debug!("PPYang result:{:?}", result);
+        // debug!("PPYang result:{:?}", result);
 
         let result_java_string = env.new_string(result.unwrap()).expect("result");
 
@@ -157,7 +157,7 @@ pub mod android {
 
         let task = sign_data_async(address, room, parties, data_to_sign, local_share);
         let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
-        debug!("PPYang result:{:?}", result);
+        // debug!("PPYang result:{:?}", result);
 
         let result_java_string = env.new_string(result.unwrap()).expect("result");
 
