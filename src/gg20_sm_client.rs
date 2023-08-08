@@ -113,27 +113,7 @@ impl SmClient {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct IssuedUniqueIdx {
     unique_idx: u16,
-}
-
-#[derive(StructOpt, Debug)]
-struct Cli {
-    #[structopt(short, long)]
-    address: surf::Url,
-    #[structopt(short, long)]
-    room: String,
-    #[structopt(subcommand)]
-    cmd: Cmd,
-}
-
-#[derive(StructOpt, Debug)]
-enum Cmd {
-    Subscribe,
-    Broadcast {
-        #[structopt(short, long)]
-        message: String,
-    },
-    IssueIdx,
 }

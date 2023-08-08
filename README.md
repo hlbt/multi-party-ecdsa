@@ -143,6 +143,9 @@ cargo build --target aarch64-linux-android --release --no-default-features --fea
 cargo build --target armv7-linux-androideabi --release --no-default-features --features curv-kzen/num-bigint
 cargo build --target i686-linux-android  --release --no-default-features --features curv-kzen/num-bigint
 
+
+cargo lipo --release --targets aarch64-apple-ios --no-default-features --features curv-kzen/num-bigint
+
 ## License
 
 Multi-party ECDSA is released under the terms of the GPL-3.0 license. See [LICENSE](LICENSE) for more information.
