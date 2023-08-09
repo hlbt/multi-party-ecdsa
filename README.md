@@ -11,7 +11,7 @@ Threshold ECDSA includes two protocols:
 -   Signing for using the secret shares to generate a signature.
 
 ECDSA is used extensively for crypto-currencies such as Bitcoin, Ethereum (secp256k1 curve), NEO (NIST P-256 curve) and much more.
-This library can be used to create MultiSig and ThresholdSig crypto wallet. For a full background on threshold signatures please read our Binance academy article [Threshold Signatures Explained](https://academy.binance.com/en/articles/threshold-signatures-explained).
+This library can be used to create MultiSig and ThresholdSig crypto wallet. For a full background on threshold signatures please read our Binance academy article [Threshold Signatures Explained](https://www.binance.vision/security/threshold-signatures-explained).
 
 ## Library Introduction
 The library was built with four core design principles in mind:
@@ -73,10 +73,12 @@ share of each party.
 
 ### Run Signing
 
-Since we use 2-of-3 scheme (`t=1 n=3`), any two parties can sign a message. Run:
+Since we use 2-of-3 scheme (`t=1 n=3`), any two parties can sign a message. You need to hash the message using keccack256 and pass it for signing. So for example if you want to sign `hello` you need to pass it as `1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8`.
 
-1. `./gg20_signing -p 1,2 -d "hello" -l local-share1.json`
-2. `./gg20_signing -p 1,2 -d "hello" -l local-share2.json`
+Run:
+
+1. `./gg20_signing -p 1,2 -d "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8" -l local-share1.json`
+2. `./gg20_signing -p 1,2 -d "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8" -l local-share2.json`
 
 Each party will produce a resulting signature. `-p 1,2` specifies indexes of parties
 who attends in signing (each party has an associated index given at keygen, see argument 

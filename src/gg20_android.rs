@@ -1,6 +1,4 @@
 use anyhow::{anyhow, Context, Result};
-use std::path::PathBuf;
-use structopt::StructOpt;
 use surf::Url;
 
 use crate::protocols::multi_party_ecdsa::gg_2020::state_machine::keygen::Keygen;
@@ -45,7 +43,7 @@ pub async fn create_key_async(address: surf::Url, room: String, index: u16, thre
 
 #[no_mangle]
 pub async fn sign_data_async(address: surf::Url, room: String, parties: Vec<u16>, data_to_sign: String, local_share: String) -> Result<String> {
-    debug!("PPYang sign_data_async start");
+    // debug!("PPYang sign_data_async start");
     let local_share = serde_json::from_str(&local_share).context("parse local share")?;
     let number_of_parties = parties.len();
 
@@ -71,10 +69,19 @@ pub async fn sign_data_async(address: surf::Url, room: String, parties: Vec<u16>
     tokio::pin!(incoming);
     tokio::pin!(outgoing);
 
+
+    let message = match hex::decode(data_to_sign.clone()) {
+        Ok(x) => x,
+        Err(_e) => data_to_sign.as_bytes().to_vec(),
+      };
+
+    let message = &message[..];
+
     let (signing, partial_signature) = SignManual::new(
-        BigInt::from_bytes(data_to_sign.as_bytes()),
+        BigInt::from_bytes(message),
         completed_offline_stage,
     )?;
+
 
     outgoing
         .send(Msg {
