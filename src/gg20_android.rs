@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context, Result};
-use surf::Url;
 
 use crate::protocols::multi_party_ecdsa::gg_2020::state_machine::keygen::Keygen;
 use round_based::async_runtime::AsyncProtocol;
@@ -113,6 +112,11 @@ pub mod android {
     use jni::objects::{JClass, JString, JObject, GlobalRef, JValueGen, JIntArray, JObjectArray, AsJArrayRaw, ReleaseMode};
     use jni::sys::{jstring, jint, jintArray, jobjectArray};
 
+    use log::{debug};
+    use crate::gg20_android::create_key_async;
+    use crate::gg20_android::sign_data_async;
+
+
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_createKey(mut env: JNIEnv, _: JClass, index: jint, jAddress: JString, jRoom: JString) -> jstring {
         android_log::init("multi-party-ecdsa").unwrap();
@@ -123,7 +127,7 @@ pub mod android {
         let room_binding = env.get_string(&jRoom).expect("invalid jRoom string");
         let room = room_binding.to_string_lossy();
 
-        let address = Url::parse(&address).expect("invalid address string");
+        let address = surf::Url::parse(&address).expect("invalid address string");
         let index = index as u16;
         let threshold = 1;
         let number_of_parties = 3;
@@ -146,7 +150,7 @@ pub mod android {
 
         let address_binding = env.get_string(&jAddress).expect("invalid address string");
         let address = address_binding.to_string_lossy();
-        let address = Url::parse(&address).expect("invalid address string");
+        let address = surf::Url::parse(&address).expect("invalid address string");
 
         let room_binding = env.get_string(&jRoom).expect("invalid jRoom string");
         let room = room_binding.to_string_lossy().to_string();
