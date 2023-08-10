@@ -119,7 +119,7 @@ pub mod android {
 
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_createKey(mut env: JNIEnv, _: JClass, index: jint, jAddress: JString, jRoom: JString) -> jstring {
-        android_log::init("multi-party-ecdsa").unwrap();
+        // android_log::init("multi-party-ecdsa").unwrap();
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey start");
         let address_binding = env.get_string(&jAddress).expect("invalid address string");
         let address = address_binding.to_string_lossy();

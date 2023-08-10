@@ -24,9 +24,9 @@ categories = ["cryptography"]
 
 [lib]
 #andriod
-#crate-type = ["dylib"]
+crate-type = ["dylib"]
 #ios
-crate-type = ["staticlib", "cdylib"]
+#crate-type = ["staticlib", "cdylib"]
 
 [features]
 default = ["curv-kzen/rust-gmp-kzen"]
