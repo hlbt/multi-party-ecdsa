@@ -116,10 +116,14 @@ pub mod android {
     use crate::gg20_android::create_key_async;
     use crate::gg20_android::sign_data_async;
 
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_showLog(mut env: JNIEnv, _: JClass) {
+        android_log::init("multi-party-ecdsa").unwrap();
+        debug!("start show log");
+    } 
 
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_createKey(mut env: JNIEnv, _: JClass, index: jint, jAddress: JString, jRoom: JString) -> jstring {
-        // android_log::init("multi-party-ecdsa").unwrap();
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey start");
         let address_binding = env.get_string(&jAddress).expect("invalid address string");
         let address = address_binding.to_string_lossy();
@@ -136,10 +140,11 @@ pub mod android {
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey call create_key_async address：{} room:{} index:{} threshold:{} number_of_parties:{}", address, room, index, threshold, number_of_parties);
         let task = create_key_async(address, room.to_string(), index, threshold, number_of_parties);
         let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
-        // debug!("PPYang result:{:?}", result);
+        debug!("PPYang Java_com_bxyz_mpc_Native_createKey result:{:?}", result);
 
         let result_java_string = env.new_string(result.unwrap()).expect("result");
 
+        debug!("PPYang Java_com_bxyz_mpc_Native_createKey return result");
         **result_java_string
     }
 
