@@ -12,6 +12,8 @@ import android.util.Log;
 import com.bxyz.mpc.Native;
 import com.bxyz.mpc.NativeCallback;
 
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     HandlerThread thread1;
@@ -26,12 +28,13 @@ public class MainActivity extends AppCompatActivity {
 
         thread1 = new HandlerThread("test1");
         thread1.start();
+        Native.showLog();
         mHandler = new Handler(thread1.getLooper(), new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
                 switch (msg.what) {
                     case 0: {
-                        String result = Native.createKey(1, "http://192.168.3.57:8000", "testKeygen");
+                        String result = Native.createKey(1, "http://api-beta.crescentbase.com:8000", "testKeygen");
                         Log.d("PPYang", "result ===========:" + result);
                         key = result;
                         break;
@@ -53,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         findViewById(R.id.create).setOnClickListener(v -> {
-//            mHandler.sendEmptyMessage(0);
-            test2();
+            mHandler.sendEmptyMessage(0);
+//            test2();
         });
 
         findViewById(R.id.sign).setOnClickListener(v -> {
@@ -63,11 +66,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test2() {
-        Native.showLog();
+        String room = "testKeygen1";
         new Thread("test1") {
             @Override
             public void run() {
-                String result = Native.createKey(1, "http://api-beta.crescentbase.com:8000", "testKeygen");
+                String result = Native.createKey(1, "http://api-beta.crescentbase.com:8000", room);
                 Log.d("PPYang", "test1 result ===========:" + result);
             }
         }.start();
@@ -80,8 +83,21 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                String result = Native.createKey(2, "http://api-beta.crescentbase.com:8000", "testKeygen");
+                String result = Native.createKey(2, "http://api-beta.crescentbase.com:8000", room);
                 Log.d("PPYang", "test2 result ===========:" + result);
+            }
+        }.start();
+
+        new Thread("test3") {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                String result = Native.createKey(3, "http://api-beta.crescentbase.com:8000", room);
+                Log.d("PPYang", "test3 result ===========:" + result);
             }
         }.start();
 
