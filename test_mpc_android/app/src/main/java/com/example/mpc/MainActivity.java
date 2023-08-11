@@ -53,11 +53,37 @@ public class MainActivity extends AppCompatActivity {
 
 
         findViewById(R.id.create).setOnClickListener(v -> {
-            mHandler.sendEmptyMessage(0);
+//            mHandler.sendEmptyMessage(0);
+            test2();
         });
 
         findViewById(R.id.sign).setOnClickListener(v -> {
             mHandler.sendEmptyMessage(1);
         });
+    }
+
+    public void test2() {
+        Native.showLog();
+        new Thread("test1") {
+            @Override
+            public void run() {
+                String result = Native.createKey(1, "http://api-beta.crescentbase.com:8000", "testKeygen");
+                Log.d("PPYang", "test1 result ===========:" + result);
+            }
+        }.start();
+
+        new Thread("test2") {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                String result = Native.createKey(2, "http://api-beta.crescentbase.com:8000", "testKeygen");
+                Log.d("PPYang", "test2 result ===========:" + result);
+            }
+        }.start();
+
     }
 }

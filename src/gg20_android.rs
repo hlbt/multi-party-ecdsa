@@ -20,6 +20,7 @@ use log::{debug};
 
 #[no_mangle]
 pub async fn create_key_async(address: surf::Url, room: String, index: u16, threshold: u16, number_of_parties: u16) -> Result<String> {
+    debug!("create_key_async start");
     let (_i, incoming, outgoing) = join_computation(address, &room)
         .await
         .context("join computation")?;
@@ -28,14 +29,18 @@ pub async fn create_key_async(address: surf::Url, room: String, index: u16, thre
     tokio::pin!(incoming);
     tokio::pin!(outgoing);
 
+    debug!("create_key_async start AsyncProtocol");
     let keygen = Keygen::new(index, threshold, number_of_parties)?;
     let output = AsyncProtocol::new(keygen, incoming, outgoing)
         .run()
         .await
         .map_err(|e| anyhow!("protocol execution terminated with error: {}", e))?;
+    
+    debug!("create_key_async has output");
     let output = serde_json::to_vec_pretty(&output).context("serialize output")?;
 
     let output = String::from_utf8(output).expect("Found invalid UTF-8");
+    debug!("create_key_async end output");
 
     Ok(output)
 }
