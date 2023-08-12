@@ -147,8 +147,8 @@ pub mod android {
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenWantsToProceed(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> bool {
-        crate::gg20_keygen::wants_to_proceed(keygen_ptr)
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenWantsToProceed(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jboolean {
+        crate::gg20_keygen::wants_to_proceed(keygen_ptr) as jboolean
     }
     
     #[no_mangle]
@@ -163,6 +163,22 @@ pub mod android {
         **result_java_string
     }
     
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenIsFinished(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> bool {
+        crate::gg20_keygen::is_finished(keygen_ptr)
+    }
+    
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenPickOutput(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jstring {
+        let str_json = crate::gg20_keygen::pick_output(keygen_ptr);
+        let result_java_string = _env.new_string(str_json).expect("result");
+        **result_java_string
+    }
+
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenCurrentRound(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jint {
+        crate::gg20_keygen::current_round(keygen_ptr) as jint
+    }
     
 
     // #[no_mangle]
