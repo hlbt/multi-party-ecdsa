@@ -48,29 +48,3 @@ pub fn message_queue(keygen_ptr: *mut Keygen) -> String {
     };
     serde_json::to_string(&keygent.message_queue()).unwrap()
 }
-
-pub fn is_finished(keygen_ptr: *mut Keygen) -> bool {
-    let keygent = unsafe {
-        assert!(!keygen_ptr.is_null());
-        &mut *keygen_ptr
-    };
-    keygent.is_finished()
-}
-
-pub fn pick_output(keygen_ptr: *mut Keygen) -> String {
-    let keygent = unsafe {
-        assert!(!keygen_ptr.is_null());
-        &mut *keygen_ptr
-    };
-
-    let result = keygent.pick_output().unwrap().expect("output");
-    serde_json::to_string(&result).unwrap()
-}
-
-pub fn current_round(keygen_ptr: *mut Keygen) -> u16 {
-    let keygent = unsafe {
-        assert!(!keygen_ptr.is_null());
-        &mut *keygen_ptr
-    };
-    keygent.current_round()
-}
