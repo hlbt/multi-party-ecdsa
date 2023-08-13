@@ -130,54 +130,54 @@ pub mod android {
     } 
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_createKeygen(_env: JNIEnv, _: JClass, index: jint) -> *mut Keygen {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_createKeygen(_env: JNIEnv, _: JClass, index: jint) -> jlong {
         let index = index as u16;
-        crate::gg20_keygen::create_keygen(index, 1, 3)
+        crate::gg20_keygen::create_keygen(index, 1, 3) as jlong
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_freeKeygen(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) {
-        crate::gg20_keygen::free_keygen(keygen_ptr);
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_freeKeygen(_env: JNIEnv, _: JClass, keygen_ptr: jlong) {
+        crate::gg20_keygen::free_keygen(keygen_ptr as *mut Keygen);
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenHandleIncoming(mut _env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen, msg_json: JString) {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenHandleIncoming(mut _env: JNIEnv, _: JClass, keygen_ptr: jlong, msg_json: JString) {
         let str_msg_json = _env.get_string(&msg_json).expect("invalid msg_json string").to_string_lossy().to_string();
-        crate::gg20_keygen::handle_incoming(keygen_ptr, str_msg_json);
+        crate::gg20_keygen::handle_incoming(keygen_ptr as *mut Keygen, str_msg_json);
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenWantsToProceed(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jboolean {
-        crate::gg20_keygen::wants_to_proceed(keygen_ptr) as jboolean
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenWantsToProceed(_env: JNIEnv, _: JClass, keygen_ptr: jlong) -> jboolean {
+        crate::gg20_keygen::wants_to_proceed(keygen_ptr as *mut Keygen) as jboolean
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenProceed(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) {
-        crate::gg20_keygen::proceed(keygen_ptr);
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenProceed(_env: JNIEnv, _: JClass, keygen_ptr: jlong) {
+        crate::gg20_keygen::proceed(keygen_ptr as *mut Keygen);
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenMessageQueue(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jstring {
-        let str_json = crate::gg20_keygen::message_queue(keygen_ptr);
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenMessageQueue(_env: JNIEnv, _: JClass, keygen_ptr: jlong) -> jstring {
+        let str_json = crate::gg20_keygen::message_queue(keygen_ptr as *mut Keygen);
         let result_java_string = _env.new_string(str_json).expect("result");
         **result_java_string
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenIsFinished(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> bool {
-        crate::gg20_keygen::is_finished(keygen_ptr)
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenIsFinished(_env: JNIEnv, _: JClass, keygen_ptr: jlong) -> jboolean {
+        crate::gg20_keygen::is_finished(keygen_ptr as *mut Keygen) as jboolean
     }
     
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenPickOutput(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jstring {
-        let str_json = crate::gg20_keygen::pick_output(keygen_ptr);
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenPickOutput(_env: JNIEnv, _: JClass, keygen_ptr: jlong) -> jstring {
+        let str_json = crate::gg20_keygen::pick_output(keygen_ptr as *mut Keygen);
         let result_java_string = _env.new_string(str_json).expect("result");
         **result_java_string
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenCurrentRound(_env: JNIEnv, _: JClass, keygen_ptr: *mut Keygen) -> jint {
-        crate::gg20_keygen::current_round(keygen_ptr) as jint
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenCurrentRound(_env: JNIEnv, _: JClass, keygen_ptr: jlong) -> jint {
+        crate::gg20_keygen::current_round(keygen_ptr as *mut Keygen) as jint
     }
     
 
