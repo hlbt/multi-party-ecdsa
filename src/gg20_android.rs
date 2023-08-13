@@ -14,9 +14,18 @@ use crate::protocols::multi_party_ecdsa::gg_2020::state_machine::sign::{
     OfflineStage, SignManual,
 };
 use round_based::Msg;
+use std::future::Future;
 
 use log::{debug};
 
+#[no_mangle]
+pub async fn start_create_key_async(address: surf::Url, room: String, index: u16, threshold: u16, number_of_parties: u16) -> Result<String> {
+    debug!("start_create_key_async start");
+    let task = create_key_async(address, room, index, threshold, number_of_parties);
+    let result = tokio::task::spawn_blocking(move || tokio::runtime::Runtime::new().unwrap().block_on(task));
+    debug!("start_create_key_async result:{:?}", result);
+    result.await.unwrap()
+}
 
 #[no_mangle]
 pub async fn create_key_async(address: surf::Url, room: String, index: u16, threshold: u16, number_of_parties: u16) -> Result<String> {
@@ -44,6 +53,7 @@ pub async fn create_key_async(address: surf::Url, room: String, index: u16, thre
 
     Ok(output)
 }
+
 
 #[no_mangle]
 pub async fn sign_data_async(address: surf::Url, room: String, parties: Vec<u16>, data_to_sign: String, local_share: String) -> Result<String> {
@@ -143,7 +153,8 @@ pub mod android {
 
 
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey call create_key_async address：{} room:{} index:{} threshold:{} number_of_parties:{}", address, room, index, threshold, number_of_parties);
-        let task = create_key_async(address, room.to_string(), index, threshold, number_of_parties);
+        // let task = create_key_async(address, room.to_string(), index, threshold, number_of_parties);
+        let task = crate::gg20_android::start_create_key_async(address, room.to_string(), index, threshold, number_of_parties);
         let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
         debug!("PPYang Java_com_bxyz_mpc_Native_createKey result:{:?}", result);
 
