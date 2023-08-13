@@ -24,6 +24,9 @@ use private::InternalError;
 pub use rounds::{LocalKey, ProceedError};
 use rounds::{Round0, Round1, Round2, Round3, Round4};
 
+use log::{debug};
+
+
 /// Keygen protocol state machine
 ///
 /// Successfully completed keygen protocol produces [LocalKey] that can be used in further
@@ -176,6 +179,7 @@ impl Keygen {
         };
 
         self.round = next_state;
+        debug!("proceed_round==== try_again:{} current_round:{}", try_again, self.current_round());
         if try_again {
             self.proceed_round(may_block)
         } else {
@@ -192,6 +196,7 @@ impl StateMachine for Keygen {
     fn handle_incoming(&mut self, msg: Msg<Self::MessageBody>) -> Result<()> {
         let current_round = self.current_round();
 
+        debug!("handle_incoming==== current_round:{} msg:{:?}", current_round, msg);
         match msg.body {
             ProtocolMessage(M::Round1(m)) => {
                 let store = self
@@ -297,6 +302,7 @@ impl StateMachine for Keygen {
     }
 
     fn is_finished(&self) -> bool {
+        debug!("is_finished=== current_round:{} matches:{}", self.current_round(), matches!(self.round, R::Final(_)));
         matches!(self.round, R::Final(_))
     }
 
