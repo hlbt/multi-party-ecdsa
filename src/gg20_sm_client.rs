@@ -63,6 +63,8 @@ impl SmClient {
     pub fn new(address: surf::Url, room_id: &str) -> Result<Self> {
         let config = surf::Config::new()
             .set_base_url(address.join(&format!("rooms/{}/", room_id))?)
+            .set_http_keep_alive(true)
+            .add_header("Connection", "keep-alive").expect("header add keep-alive fail")
             .set_timeout(None);
         Ok(Self {
             http_client: config.try_into()?,
