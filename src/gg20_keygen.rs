@@ -51,7 +51,7 @@ pub fn message_queue(keygen_ptr: *mut Keygen) -> String {
         &mut *keygen_ptr
     };
     let to_json = serde_json::to_string(&keygent.message_queue());
-    keygent.message_queue().drain(1..);
+    keygent.message_queue().drain(..);
     to_json.unwrap()
 }
 
