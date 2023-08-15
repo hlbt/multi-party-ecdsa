@@ -50,8 +50,9 @@ pub fn message_queue(keygen_ptr: *mut Keygen) -> String {
         assert!(!keygen_ptr.is_null());
         &mut *keygen_ptr
     };
-    let collect: Vec<_> = keygent.message_queue().drain(1..).collect();
-    serde_json::to_string(&collect).unwrap()
+    let to_json = serde_json::to_string(&keygent.message_queue());
+    keygent.message_queue().drain(1..);
+    to_json.unwrap()
 }
 
 pub fn is_finished(keygen_ptr: *mut Keygen) -> bool {
