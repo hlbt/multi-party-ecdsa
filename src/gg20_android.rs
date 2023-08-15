@@ -142,8 +142,11 @@ pub mod android {
     
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_keygenHandleIncoming(mut _env: JNIEnv, _: JClass, keygen_ptr: jlong, msg_json: JString) {
-        let str_msg_json = _env.get_string(&msg_json).expect("invalid msg_json string").to_string_lossy().to_string();
-        crate::gg20_keygen::handle_incoming(keygen_ptr as *mut Keygen, str_msg_json);
+        debug!("Java_com_bxyz_mpc_Native_keygenHandleIncoming start");
+        let jmsg_json = _env.get_string(&msg_json).expect("invalid msg_json string");
+        let str_msg_json = jmsg_json.to_string_lossy();
+        debug!("Java_com_bxyz_mpc_Native_keygenHandleIncoming handle_incoming start");
+        crate::gg20_keygen::handle_incoming(keygen_ptr as *mut Keygen, str_msg_json.to_string());
     }
     
     #[no_mangle]

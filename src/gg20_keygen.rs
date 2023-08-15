@@ -1,6 +1,7 @@
 use crate::protocols::multi_party_ecdsa::gg_2020::state_machine::keygen::{Keygen, ProtocolMessage};
 use round_based::Msg;
 use round_based::StateMachine;
+use log::*;
 
 pub fn create_keygen(index: u16, threshold: u16, number_of_parties: u16) -> *mut Keygen {
     let keygen = Keygen::new(index, threshold, number_of_parties).expect("expected keygen");
@@ -17,11 +18,14 @@ pub fn free_keygen(keygen_ptr: *mut Keygen) {
 }
 
 pub fn handle_incoming(keygen_ptr: *mut Keygen, msg_json: String) {
+    debug!("gg20_keygen handle_incoming start");
     let keygent = unsafe {
         assert!(!keygen_ptr.is_null());
         &mut *keygen_ptr
     };
+    debug!("gg20_keygen handle_incoming serde_json start");
     let msg = serde_json::from_str::<Msg<ProtocolMessage>>(&msg_json).expect("deserialize message");
+    debug!("gg20_keygen eygent.handle_incoming start");
     keygent.handle_incoming(msg).unwrap();
 }
 
