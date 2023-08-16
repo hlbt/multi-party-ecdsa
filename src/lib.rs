@@ -21,6 +21,8 @@
 pub mod protocols;
 pub mod utilities;
 pub mod gg20_keygen;
+pub mod gg20_refresh;
+pub mod gg20_signing;
 pub mod gg20_android;
 use std::fmt;
 
