@@ -263,6 +263,37 @@ pub mod android {
         };
         result as jint
     }
+
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_dataToSign(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString) -> jstring {
+        let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
+        let data_to_sign = jdata_to_sign.to_string_lossy();
+
+        let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
+        let offline_stage_json = joffline_stage_json.to_string_lossy();
+
+        let str_json = crate::gg20_signing::data_to_sign(data_to_sign.to_string(), offline_stage_json.to_string());
+
+        let result_java_string = _env.new_string(str_json).expect("result");
+        **result_java_string
+    }
+    
+    #[no_mangle]
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_completeSignature(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString, partial_signatures_json: JString) -> jstring {
+        let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
+        let data_to_sign = jdata_to_sign.to_string_lossy();
+
+        let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
+        let offline_stage_json = joffline_stage_json.to_string_lossy();
+
+        let jpartial_signatures_json = _env.get_string(&partial_signatures_json).expect("invalid offline_stage_json string");
+        let partial_signatures_json = jpartial_signatures_json.to_string_lossy();
+
+        let str_json = crate::gg20_signing::complete_signature(data_to_sign.to_string(), offline_stage_json.to_string(), partial_signatures_json.to_string());
+
+        let result_java_string = _env.new_string(str_json).expect("result");
+        **result_java_string
+    }
     
 
     // #[no_mangle]

@@ -134,5 +134,5 @@ pub fn complete_signature(data_to_sign: String, offline_stage_json: String, part
         .complete(&partial_signatures)
         .unwrap();
 
-     serde_json::to_string(&signature).unwrap()
+    serde_json::to_string(&signature).unwrap()
 }
