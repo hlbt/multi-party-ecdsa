@@ -644,7 +644,7 @@ impl Round6 {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CompletedOfflineStage {
     i: u16,
     local_key: LocalKey<Secp256k1>,
