@@ -24,9 +24,9 @@ categories = ["cryptography"]
 
 [lib]
 #other
-crate-type = ["lib"]
+#crate-type = ["lib"]
 #andriod
-#crate-type = ["dylib"]
+crate-type = ["dylib"]
 #ios
 #crate-type = ["staticlib", "cdylib"]
 

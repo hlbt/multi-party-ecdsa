@@ -138,10 +138,10 @@ pub mod android {
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_createRefresh(_env: JNIEnv, _: JClass, key_json: jstring, new_party_index: jint) -> jlong {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_createRefresh(mut _env: JNIEnv, _: JClass, key_json: JString, new_party_index: jint) -> jlong {
         let json_key = match Some(key_json) {
             Some(json) => {
-                let jkey_json = _env.get_string(&key_json).expect("invalid msg_json string");
+                let jkey_json = _env.get_string(&json).expect("invalid msg_json string");
                 let str_key_json = jkey_json.to_string_lossy();
                 Some(str_key_json.to_string())
             },
@@ -152,11 +152,11 @@ pub mod android {
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_createSigning(_env: JNIEnv, _: JClass, ms_index: jint, parties: JIntArray, key_json: jstring) -> jlong {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_createSigning(mut _env: JNIEnv, _: JClass, ms_index: jint, parties: JIntArray, key_json: JString) -> jlong {
         let ms_index = ms_index as u16;
 
-        let len = env.get_array_length(&parties).expect("Can't get array elements");
-        let elements = env.get_array_elements(&parties, ReleaseMode::NoCopyBack).expect("Can't get array elements");
+        let len = _env.get_array_length(&parties).expect("Can't get array elements");
+        let elements = _env.get_array_elements(&parties, ReleaseMode::NoCopyBack).expect("Can't get array elements");
         let parties: Vec<u16> = elements.iter().map(|int| *int as u16).collect();
 
         let jkey_json = _env.get_string(&key_json).expect("invalid msg_json string");
@@ -173,6 +173,7 @@ pub mod android {
             1 => crate::gg20_keygen::free_keygen(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::free_refresh(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::free_signing(mpc_ptr as *mut OfflineStage),
+            _ => (),
         };
     }
     
@@ -186,6 +187,7 @@ pub mod android {
             1 => crate::gg20_keygen::handle_incoming(mpc_ptr as *mut Keygen, str_msg_json.to_string()),
             2 => crate::gg20_refresh::handle_incoming(mpc_ptr as *mut KeyRefresh, str_msg_json.to_string()),
             3 => crate::gg20_signing::handle_incoming(mpc_ptr as *mut OfflineStage, str_msg_json.to_string()),
+            _ => (),
         };
     }
     
@@ -196,6 +198,7 @@ pub mod android {
             1 => crate::gg20_keygen::wants_to_proceed(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::wants_to_proceed(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::wants_to_proceed(mpc_ptr as *mut OfflineStage),
+            _ => false,
         };
         result as jboolean
     }
@@ -207,6 +210,7 @@ pub mod android {
             1 => crate::gg20_keygen::proceed(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::proceed(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::proceed(mpc_ptr as *mut OfflineStage),
+            _ => (),
         };
     }
 
@@ -217,6 +221,7 @@ pub mod android {
             1 => crate::gg20_keygen::message_queue(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::message_queue(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::message_queue(mpc_ptr as *mut OfflineStage),
+            _ => "".to_string(),
         };
         let result_java_string = _env.new_string(str_json).expect("result");
         **result_java_string
@@ -229,6 +234,7 @@ pub mod android {
             1 => crate::gg20_keygen::is_finished(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::is_finished(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::is_finished(mpc_ptr as *mut OfflineStage),
+            _ => false,
         };
         result as jboolean
     }
@@ -240,6 +246,7 @@ pub mod android {
             1 => crate::gg20_keygen::pick_output(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::pick_output(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::pick_output(mpc_ptr as *mut OfflineStage),
+            _ => "".to_string(),
         };
         let result_java_string = _env.new_string(str_json).expect("result");
         **result_java_string
@@ -252,6 +259,7 @@ pub mod android {
             1 => crate::gg20_keygen::current_round(mpc_ptr as *mut Keygen),
             2 => crate::gg20_refresh::current_round(mpc_ptr as *mut KeyRefresh),
             3 => crate::gg20_signing::current_round(mpc_ptr as *mut OfflineStage),
+            _ => 0,
         };
         result as jint
     }
