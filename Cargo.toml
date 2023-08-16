@@ -23,8 +23,10 @@ license = "GPL-3.0-or-later"
 categories = ["cryptography"]
 
 [lib]
+#other
+crate-type = ["lib"]
 #andriod
-crate-type = ["dylib"]
+#crate-type = ["dylib"]
 #ios
 #crate-type = ["staticlib", "cdylib"]
 
@@ -36,7 +38,7 @@ cclst = ["class_group"]
 subtle = { version = "2" }
 serde = { version = "1.0", features = ["derive"] }
 zeroize = "1"
-curv-kzen = { version = "0.9", default-features = false }
+curv-kzen = { version = "0.10", default-features = false }
 centipede = { version = "0.3", default-features = false }
 zk-paillier = { version = "0.4.3", default-features = false }
 round-based = { version = "0.1.4", features = [] }
@@ -44,20 +46,11 @@ thiserror = "1.0.23"
 derivative = "2"
 sha2 = "0.9"
 
-openssl =  { version = "0.10", features=["vendored"] }
-tokio = { version = "1", default-features = false, features = ["macros"] }
-anyhow = "1"
-futures = "0.3"
-structopt = "0.3"
-surf = "2"
-async-sse = "5"
 serde_json = "1.0"
-hex = "0.4"
-
 log = "0.4"
 
 [dependencies.paillier]
-version = "0.4.2"
+version = "0.4.3"
 package = "kzen-paillier"
 default-features = false
 
@@ -65,6 +58,12 @@ default-features = false
 version = "0.6"
 default-features = false
 optional = true
+
+#fs-dkr
+[dependencies.bitvec]
+version = "1"
+default-features = false
+features = ["atomic", "alloc"]
 
 [target.'cfg(target_os="android")'.dependencies]
 jni-sys = "0.3.0"
@@ -77,6 +76,14 @@ android_log = "0.1.3"
 criterion = "0.3"
 aes-gcm = "0.9.4"
 
+openssl =  { version = "0.10", features=["vendored"] }
+tokio = { version = "1", default-features = false, features = ["macros"] }
+anyhow = "1"
+futures = "0.3"
+structopt = "0.3"
+surf = "2"
+async-sse = "5"
+hex = "0.4"
 
 
 rocket = { version = "0.5.0-rc.1", default-features = false, features = ["json"] }

@@ -22,7 +22,6 @@ pub mod protocols;
 pub mod utilities;
 pub mod gg20_keygen;
 pub mod gg20_android;
-pub mod gg20_sm_client;
 use std::fmt;
 
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
@@ -53,7 +52,7 @@ impl fmt::Display for Error {
 use std::os::raw::{c_char, c_int};
 use std::ffi::{CString, CStr};
 use std::slice;
-use surf::Url;
+// use surf::Url;
 
 // #[no_mangle]
 // pub extern fn create_key(address: *const c_char, room: *const c_char, index: c_int, threshold: c_int, number_of_parties: c_int) -> *mut c_char {

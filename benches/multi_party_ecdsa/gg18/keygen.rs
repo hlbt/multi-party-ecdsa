@@ -27,7 +27,7 @@ mod bench {
         Vec<SharedKeys>,
         Vec<Point<Secp256k1>>,
         Point<Secp256k1>,
-        VerifiableSS<Secp256k1>,
+        VerifiableSS<Secp256k1, sha2::Sha256>,
     ) {
         let parames = Parameters {
             threshold: t,
