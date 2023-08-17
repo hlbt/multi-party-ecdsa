@@ -85,6 +85,12 @@ who attends in signing (each party has an associated index given at keygen, see 
 `-i`), `-l file.json` sets a path to a file with secret local share, and `-d "hello"`
 is a message being signed.
 
+### Run Signing
+
+1. `./gg20_refresh -t 1 -n 3 -c 2 --output local-share-refresh1.json -l local-share1.json`
+2. `./gg20_refresh -t 1 -n 3 -c 2 --output local-share-refresh2.json`
+3. `./gg20_refresh -t 1 -n 3 -c 2 --output local-share-refresh3.json -l local-share3.json`
+
 ### Running Demo on different computers
 
 While previous steps show how to run keygen & signing on local computer, you actually can
