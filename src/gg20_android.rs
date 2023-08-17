@@ -167,7 +167,7 @@ pub mod android {
 
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_free(_env: JNIEnv, _: JClass, call_type: jint, mpc_ptr: jlong) {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_freeMpc(_env: JNIEnv, _: JClass, call_type: jint, mpc_ptr: jlong) {
         let call_type = call_type as u16;
         match call_type {
             1 => crate::gg20_keygen::free_keygen(mpc_ptr as *mut Keygen),
