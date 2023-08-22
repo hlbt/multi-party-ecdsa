@@ -152,7 +152,7 @@ pub mod android {
     }
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_createSigning(mut _env: JNIEnv, _: JClass, ms_index: jint, parties: JIntArray, key_json: JString) -> jlong {
+    pub unsafe extern fn Java_com_bxyz_mpc_Native_createSigning(mut _env: JNIEnv, _: JClass, ms_index: jint, parties: JIntArray, key_json: JString, data_to_sign: JString) -> jlong {
         let ms_index = ms_index as u16;
 
         let len = _env.get_array_length(&parties).expect("Can't get array elements");
@@ -162,7 +162,10 @@ pub mod android {
         let jkey_json = _env.get_string(&key_json).expect("invalid msg_json string");
         let str_key_json = jkey_json.to_string_lossy();
 
-        crate::gg20_signing::create_signing(ms_index, parties, str_key_json.to_string()) as jlong
+        let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
+        let data_to_sign = jdata_to_sign.to_string_lossy();
+
+        crate::gg20_signing::create_signing(ms_index, parties, str_key_json.to_string(), data_to_sign.to_string()) as jlong
     }
 
 
@@ -264,93 +267,34 @@ pub mod android {
         result as jint
     }
 
-    #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_dataToSign(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString) -> jstring {
-        let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
-        let data_to_sign = jdata_to_sign.to_string_lossy();
-
-        let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
-        let offline_stage_json = joffline_stage_json.to_string_lossy();
-
-        let str_json = crate::gg20_signing::data_to_sign(data_to_sign.to_string(), offline_stage_json.to_string());
-
-        let result_java_string = _env.new_string(str_json).expect("result");
-        **result_java_string
-    }
-    
-    #[no_mangle]
-    pub unsafe extern fn Java_com_bxyz_mpc_Native_completeSignature(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString, partial_signatures_json: JString) -> jstring {
-        let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
-        let data_to_sign = jdata_to_sign.to_string_lossy();
-
-        let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
-        let offline_stage_json = joffline_stage_json.to_string_lossy();
-
-        let jpartial_signatures_json = _env.get_string(&partial_signatures_json).expect("invalid offline_stage_json string");
-        let partial_signatures_json = jpartial_signatures_json.to_string_lossy();
-
-        let str_json = crate::gg20_signing::complete_signature(data_to_sign.to_string(), offline_stage_json.to_string(), partial_signatures_json.to_string());
-
-        let result_java_string = _env.new_string(str_json).expect("result");
-        **result_java_string
-    }
-    
-
     // #[no_mangle]
-    // pub unsafe extern fn Java_com_bxyz_mpc_Native_createKey(mut env: JNIEnv, _: JClass, index: jint, jAddress: JString, jRoom: JString) -> jstring {
-    //     debug!("PPYang Java_com_bxyz_mpc_Native_createKey start");
-    //     let address_binding = env.get_string(&jAddress).expect("invalid address string");
-    //     let address = address_binding.to_string_lossy();
+    // pub unsafe extern fn Java_com_bxyz_mpc_Native_dataToSign(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString) -> jstring {
+    //     let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
+    //     let data_to_sign = jdata_to_sign.to_string_lossy();
 
-    //     let room_binding = env.get_string(&jRoom).expect("invalid jRoom string");
-    //     let room = room_binding.to_string_lossy();
+    //     let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
+    //     let offline_stage_json = joffline_stage_json.to_string_lossy();
 
-    //     let address = surf::Url::parse(&address).expect("invalid address string");
-    //     let index = index as u16;
-    //     let threshold = 1;
-    //     let number_of_parties = 3;
+    //     let str_json = crate::gg20_signing::data_to_sign(data_to_sign.to_string(), offline_stage_json.to_string());
 
-
-    //     debug!("PPYang Java_com_bxyz_mpc_Native_createKey call create_key_async address：{} room:{} index:{} threshold:{} number_of_parties:{}", address, room, index, threshold, number_of_parties);
-    //     let task = create_key_async(address, room.to_string(), index, threshold, number_of_parties);
-    //     let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
-    //     debug!("PPYang Java_com_bxyz_mpc_Native_createKey result:{:?}", result);
-
-    //     let result_java_string = env.new_string(result.unwrap()).expect("result");
-
-    //     debug!("PPYang Java_com_bxyz_mpc_Native_createKey return result");
+    //     let result_java_string = _env.new_string(str_json).expect("result");
     //     **result_java_string
     // }
-
-
+    
     // #[no_mangle]
-    // pub unsafe extern fn Java_com_bxyz_mpc_Native_signData(mut env: JNIEnv, _: JClass, jAddress: JString, jRoom: JString, parties: JIntArray, data_to_sign: JString, local_share: JString) -> jstring {
-    //     debug!("PPYang Java_com_bxyz_mpc_Native_signData start");
+    // pub unsafe extern fn Java_com_bxyz_mpc_Native_completeSignature(mut _env: JNIEnv, _: JClass, data_to_sign: JString, offline_stage_json: JString, partial_signatures_json: JString) -> jstring {
+    //     let jdata_to_sign = _env.get_string(&data_to_sign).expect("invalid data_to_sign string");
+    //     let data_to_sign = jdata_to_sign.to_string_lossy();
 
-    //     let address_binding = env.get_string(&jAddress).expect("invalid address string");
-    //     let address = address_binding.to_string_lossy();
-    //     let address = surf::Url::parse(&address).expect("invalid address string");
+    //     let joffline_stage_json = _env.get_string(&offline_stage_json).expect("invalid offline_stage_json string");
+    //     let offline_stage_json = joffline_stage_json.to_string_lossy();
 
-    //     let room_binding = env.get_string(&jRoom).expect("invalid jRoom string");
-    //     let room = room_binding.to_string_lossy().to_string();
+    //     let jpartial_signatures_json = _env.get_string(&partial_signatures_json).expect("invalid offline_stage_json string");
+    //     let partial_signatures_json = jpartial_signatures_json.to_string_lossy();
 
-    //     let len = env.get_array_length(&parties).expect("Can't get array elements");
-    //     let elements = env.get_array_elements(&parties, ReleaseMode::NoCopyBack).expect("Can't get array elements");
-    //     let parties: Vec<u16> = elements.iter().map(|int| *int as u16).collect();
+    //     let str_json = crate::gg20_signing::complete_signature(data_to_sign.to_string(), offline_stage_json.to_string(), partial_signatures_json.to_string());
 
-    //     let data_to_sign_binding = env.get_string(&data_to_sign).expect("invalid data_to_sign string");
-    //     let data_to_sign = data_to_sign_binding.to_string_lossy().to_string();
-
-    //     let local_share_binding = env.get_string(&local_share).expect("invalid local_share string");
-    //     let local_share = local_share_binding.to_string_lossy().to_string();
-
-
-    //     let task = sign_data_async(address, room, parties, data_to_sign, local_share);
-    //     let result = tokio::runtime::Runtime::new().unwrap().block_on(task);
-    //     // debug!("PPYang result:{:?}", result);
-
-    //     let result_java_string = env.new_string(result.unwrap()).expect("result");
-
+    //     let result_java_string = _env.new_string(str_json).expect("result");
     //     **result_java_string
     // }
 }
