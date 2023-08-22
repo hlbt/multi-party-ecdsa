@@ -7,9 +7,7 @@ use structopt::StructOpt;
 use curv::arithmetic::Converter;
 use curv::BigInt;
 
-use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::state_machine::sign::{
-    OfflineStage, SignManual,
-};
+use multi_party_ecdsa::protocols::multi_party_ecdsa::gg_2020::state_machine::sign::OfflineStage;
 use round_based::async_runtime::AsyncProtocol;
 use round_based::Msg;
 
@@ -40,6 +38,13 @@ async fn main() -> Result<()> {
     let local_share = serde_json::from_slice(&local_share).context("parse local share")?;
     let number_of_parties = args.parties.len();
 
+    let message = match hex::decode(args.data_to_sign.clone()) {
+      Ok(x) => x,
+      Err(_e) => args.data_to_sign.as_bytes().to_vec(),
+    };
+
+    let message = &message[..];
+
     let (i, incoming, outgoing) =
         join_computation(args.address.clone(), &format!("{}-offline", args.room))
             .await
@@ -49,49 +54,49 @@ async fn main() -> Result<()> {
     tokio::pin!(incoming);
     tokio::pin!(outgoing);
 
-    let signing = OfflineStage::new(i, args.parties, local_share)?;
+    let signing = OfflineStage::new(i, args.parties, local_share, BigInt::from_bytes(message))?;
     let completed_offline_stage = AsyncProtocol::new(signing, incoming, outgoing)
         .run()
         .await
         .map_err(|e| anyhow!("protocol execution terminated with error: {}", e))?;
 
-    let (i, incoming, outgoing) = join_computation(args.address, &format!("{}-online", args.room))
-        .await
-        .context("join online computation")?;
+    // let (i, incoming, outgoing) = join_computation(args.address, &format!("{}-online", args.room))
+    //     .await
+    //     .context("join online computation")?;
 
-    tokio::pin!(incoming);
-    tokio::pin!(outgoing);
+    // tokio::pin!(incoming);
+    // tokio::pin!(outgoing);
 
-    let message = match hex::decode(args.data_to_sign.clone()) {
-      Ok(x) => x,
-      Err(_e) => args.data_to_sign.as_bytes().to_vec(),
-    };
+    // let message = match hex::decode(args.data_to_sign.clone()) {
+    //   Ok(x) => x,
+    //   Err(_e) => args.data_to_sign.as_bytes().to_vec(),
+    // };
 
-    let message = &message[..];
+    // let message = &message[..];
 
-    let (signing, partial_signature) = SignManual::new(
-        BigInt::from_bytes(message),
-        completed_offline_stage,
-    )?;
+    // let (signing, partial_signature) = SignManual::new(
+    //     BigInt::from_bytes(message),
+    //     completed_offline_stage,
+    // )?;
 
+    // println!("partial_signature:{:?}", partial_signature);
+    // outgoing
+    //     .send(Msg {
+    //         sender: i,
+    //         receiver: None,
+    //         body: partial_signature,
+    //     })
+    //     .await?;
 
-    outgoing
-        .send(Msg {
-            sender: i,
-            receiver: None,
-            body: partial_signature,
-        })
-        .await?;
-
-    let partial_signatures: Vec<_> = incoming
-        .take(number_of_parties - 1)
-        .map_ok(|msg| msg.body)
-        .try_collect()
-        .await?;
-    let signature = signing
-        .complete(&partial_signatures)
-        .context("online stage failed")?;
-    let signature = serde_json::to_string(&signature).context("serialize signature")?;
+    // let partial_signatures: Vec<_> = incoming
+    //     .take(number_of_parties - 1)
+    //     .map_ok(|msg| msg.body)
+    //     .try_collect()
+    //     .await?;
+    // let signature = signing
+    //     .complete(&partial_signatures)
+    //     .context("online stage failed")?;
+    let signature = serde_json::to_string(&completed_offline_stage).context("serialize signature")?;
     println!("{}", signature);
 
     Ok(())

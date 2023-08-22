@@ -48,6 +48,7 @@ pub struct SI(pub Point<Secp256k1>);
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HEGProof(pub HomoELGamalProof<Secp256k1, Sha256>);
 
+// PartialSignature
 pub struct Round0 {
     /// Index of this party
     ///
@@ -62,6 +63,8 @@ pub struct Round0 {
 
     /// Party local secret share
     pub local_key: LocalKey<Secp256k1>,
+
+    pub message: BigInt,
 }
 
 impl Round0 {
@@ -94,6 +97,7 @@ impl Round0 {
             i: self.i,
             s_l: self.s_l.clone(),
             local_key: self.local_key,
+            message: self.message,
             m_a,
             sign_keys,
             phase1_com: bc1,
@@ -112,6 +116,7 @@ pub struct Round1 {
     i: u16,
     s_l: Vec<u16>,
     local_key: LocalKey<Secp256k1>,
+    message: BigInt,
     m_a: (MessageA, BigInt),
     sign_keys: SignKeys,
     phase1_com: SignBroadcastPhase1,
@@ -195,6 +200,7 @@ impl Round1 {
             i: self.i,
             s_l: self.s_l,
             local_key: self.local_key,
+            message: self.message,
             sign_keys: self.sign_keys,
             m_a: self.m_a,
             beta_vec,
@@ -221,6 +227,7 @@ pub struct Round2 {
     i: u16,
     s_l: Vec<u16>,
     local_key: LocalKey<Secp256k1>,
+    message: BigInt,
     sign_keys: SignKeys,
     m_a: (MessageA, BigInt),
     beta_vec: Vec<Scalar<Secp256k1>>,
@@ -302,6 +309,7 @@ impl Round2 {
             i: self.i,
             s_l: self.s_l,
             local_key: self.local_key,
+            message: self.message,
             sign_keys: self.sign_keys,
             m_a: self.m_a,
             mb_gamma_s: m_b_gamma_s,
@@ -329,6 +337,7 @@ pub struct Round3 {
     i: u16,
     s_l: Vec<u16>,
     local_key: LocalKey<Secp256k1>,
+    message: BigInt,
     sign_keys: SignKeys,
     m_a: (MessageA, BigInt),
     mb_gamma_s: Vec<MessageB>,
@@ -387,6 +396,7 @@ impl Round3 {
             i: self.i,
             s_l: self.s_l,
             local_key: self.local_key,
+            message: self.message,
             sign_keys: self.sign_keys,
             m_a: self.m_a,
             mb_gamma_s: self.mb_gamma_s,
@@ -414,6 +424,7 @@ pub struct Round4 {
     i: u16,
     s_l: Vec<u16>,
     local_key: LocalKey<Secp256k1>,
+    message: BigInt,
     sign_keys: SignKeys,
     m_a: (MessageA, BigInt),
     mb_gamma_s: Vec<MessageB>,
@@ -434,7 +445,7 @@ impl Round4 {
         mut output: O,
     ) -> Result<Round5>
     where
-        O: Push<Msg<(RDash, Vec<PDLwSlackProof>)>>,
+        O: Push<Msg<PartialSignature>>,
     {
         let decom_vec: Vec<_> = decommit_round1.into_vec_including_me(self.phase1_decom.clone());
 
@@ -475,167 +486,27 @@ impl Round4 {
             phase5_proofs_vec.push(proof);
         }
 
+        let local_signature = LocalSignature::phase7_local_sig(
+            &self.sign_keys.k_i,
+            &self.message,
+            &R,
+            &self.sigma_i,
+            &self.local_key.y_sum_s,
+        );
+        let partial = PartialSignature(local_signature.s_i.clone());
+
         output.push(Msg {
             sender: self.i,
             receiver: None,
-            body: (RDash(R_dash.clone()), phase5_proofs_vec.clone()),
+            body: partial.clone(),
         });
 
         Ok(Round5 {
-            i: self.i,
-            s_l: self.s_l,
-            local_key: self.local_key,
-            sign_keys: self.sign_keys,
-            t_vec: self.t_vec,
-            m_a_vec: self.m_a_vec,
-            t_i: self.t_i,
-            l_i: self.l_i,
-            sigma_i: self.sigma_i,
-            R,
-            R_dash,
-            phase5_proofs_vec,
+            local_signature,
         })
     }
 
     pub fn expects_messages(i: u16, n: u16) -> Store<BroadcastMsgs<SignDecommitPhase1>> {
-        containers::BroadcastMsgsStore::new(i, n)
-    }
-
-    pub fn is_expensive(&self) -> bool {
-        true
-    }
-}
-
-pub struct Round5 {
-    i: u16,
-    s_l: Vec<u16>,
-    local_key: LocalKey<Secp256k1>,
-    sign_keys: SignKeys,
-    t_vec: Vec<Point<Secp256k1>>,
-    m_a_vec: Vec<MessageA>,
-    t_i: Point<Secp256k1>,
-    l_i: Scalar<Secp256k1>,
-    sigma_i: Scalar<Secp256k1>,
-    R: Point<Secp256k1>,
-    R_dash: Point<Secp256k1>,
-    phase5_proofs_vec: Vec<PDLwSlackProof>,
-}
-
-impl Round5 {
-    pub fn proceed<O>(
-        self,
-        input: BroadcastMsgs<(RDash, Vec<PDLwSlackProof>)>,
-        mut output: O,
-    ) -> Result<Round6>
-    where
-        O: Push<Msg<(SI, HEGProof)>>,
-    {
-        let (r_dash_vec, pdl_proof_mat_inc_me): (Vec<_>, Vec<_>) = input
-            .into_vec_including_me((RDash(self.R_dash), self.phase5_proofs_vec))
-            .into_iter()
-            .map(|(r_dash, pdl_proof)| (r_dash.0, pdl_proof))
-            .unzip();
-
-        let l_s: Vec<_> = self
-            .s_l
-            .iter()
-            .cloned()
-            .map(|i| usize::from(i) - 1)
-            .collect();
-        let ttag = self.s_l.len();
-        for i in 0..ttag {
-            LocalSignature::phase5_verify_pdl(
-                &pdl_proof_mat_inc_me[i],
-                &r_dash_vec[i],
-                &self.R,
-                &self.m_a_vec[i].c,
-                &self.local_key.paillier_key_vec[l_s[i]],
-                &self.local_key.h1_h2_n_tilde_vec,
-                &l_s,
-                i,
-            )
-            .map_err(|e| Error::Round5(e))?;
-        }
-        LocalSignature::phase5_check_R_dash_sum(&r_dash_vec).map_err(|e| {
-            Error::Round5(ErrorType {
-                error_type: e.to_string(),
-                bad_actors: vec![],
-            })
-        })?;
-
-        let (S_i, homo_elgamal_proof) = LocalSignature::phase6_compute_S_i_and_proof_of_consistency(
-            &self.R,
-            &self.t_i,
-            &self.sigma_i,
-            &self.l_i,
-        );
-
-        output.push(Msg {
-            sender: self.i,
-            receiver: None,
-            body: (SI(S_i.clone()), HEGProof(homo_elgamal_proof.clone())),
-        });
-
-        Ok(Round6 {
-            S_i,
-            homo_elgamal_proof,
-            s_l: self.s_l,
-            protocol_output: CompletedOfflineStage {
-                i: self.i,
-                local_key: self.local_key,
-                sign_keys: self.sign_keys,
-                t_vec: self.t_vec,
-                R: self.R,
-                sigma_i: self.sigma_i,
-            },
-        })
-    }
-
-    pub fn expects_messages(i: u16, n: u16) -> Store<BroadcastMsgs<(RDash, Vec<PDLwSlackProof>)>> {
-        containers::BroadcastMsgsStore::new(i, n)
-    }
-
-    pub fn is_expensive(&self) -> bool {
-        true
-    }
-}
-
-pub struct Round6 {
-    S_i: Point<Secp256k1>,
-    homo_elgamal_proof: HomoELGamalProof<Secp256k1, Sha256>,
-    s_l: Vec<u16>,
-    /// Round 6 guards protocol output until final checks are taken the place
-    protocol_output: CompletedOfflineStage,
-}
-
-impl Round6 {
-    pub fn proceed(
-        self,
-        input: BroadcastMsgs<(SI, HEGProof)>,
-    ) -> Result<CompletedOfflineStage, Error> {
-        let (S_i_vec, hegp_vec): (Vec<_>, Vec<_>) = input
-            .into_vec_including_me((SI(self.S_i), HEGProof(self.homo_elgamal_proof)))
-            .into_iter()
-            .map(|(s_i, hegp_i)| (s_i.0, hegp_i.0))
-            .unzip();
-        let R_vec: Vec<_> = iter::repeat(self.protocol_output.R.clone())
-            .take(self.s_l.len())
-            .collect();
-
-        LocalSignature::phase6_verify_proof(
-            &S_i_vec,
-            &hegp_vec,
-            &R_vec,
-            &self.protocol_output.t_vec,
-        )
-        .map_err(Error::Round6VerifyProof)?;
-        LocalSignature::phase6_check_S_i_sum(&self.protocol_output.local_key.y_sum_s, &S_i_vec)
-            .map_err(Error::Round6CheckSig)?;
-
-        Ok(self.protocol_output)
-    }
-
-    pub fn expects_messages(i: u16, n: u16) -> Store<BroadcastMsgs<(SI, HEGProof)>> {
         containers::BroadcastMsgsStore::new(i, n)
     }
 
@@ -663,32 +534,30 @@ impl CompletedOfflineStage {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PartialSignature(Scalar<Secp256k1>);
 
-#[derive(Clone)]
-pub struct Round7 {
+pub struct Round5 {
     local_signature: LocalSignature,
 }
 
-impl Round7 {
-    pub fn new(
-        message: &BigInt,
-        completed_offline_stage: CompletedOfflineStage,
-    ) -> Result<(Self, PartialSignature)> {
-        let local_signature = LocalSignature::phase7_local_sig(
-            &completed_offline_stage.sign_keys.k_i,
-            message,
-            &completed_offline_stage.R,
-            &completed_offline_stage.sigma_i,
-            &completed_offline_stage.local_key.y_sum_s,
-        );
-        let partial = PartialSignature(local_signature.s_i.clone());
-        Ok((Self { local_signature }, partial))
-    }
 
-    pub fn proceed_manual(self, sigs: &[PartialSignature]) -> Result<SignatureRecid> {
-        let sigs = sigs.iter().map(|s_i| s_i.0.clone()).collect::<Vec<_>>();
+impl Round5 {
+    pub fn proceed(
+        self,
+        input: BroadcastMsgs<PartialSignature>,
+    ) -> Result<SignatureRecid>
+    {
+        let sigs = input.into_vec().into_iter().map(|s_i| s_i.0.clone()).collect::<Vec<_>>();
+        println!("Round5 === sigs.len():{}", sigs.len());
         self.local_signature
             .output_signature(&sigs)
             .map_err(Error::Round7)
+    }
+
+    pub fn expects_messages(i: u16, n: u16) -> Store<BroadcastMsgs<PartialSignature>> {
+        containers::BroadcastMsgsStore::new(i, n)
+    }
+
+    pub fn is_expensive(&self) -> bool {
+        true
     }
 }
 

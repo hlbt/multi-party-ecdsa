@@ -31,7 +31,7 @@ impl From<&super::OfflineStage> for OfflineStageProgress {
                 super::OfflineR::R3(_) => OfflineR::R3,
                 super::OfflineR::R4(_) => OfflineR::R4,
                 super::OfflineR::R5(_) => OfflineR::R5,
-                super::OfflineR::R6(_) => OfflineR::R6,
+                // super::OfflineR::R6(_) => OfflineR::R6,
                 super::OfflineR::Finished(_) => OfflineR::Finished,
                 super::OfflineR::Gone => OfflineR::Gone,
             },

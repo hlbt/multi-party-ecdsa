@@ -140,7 +140,7 @@ pub extern fn create_refresh(json_key: *const c_char, new_party_index: c_int) ->
 }
 
 #[no_mangle]
-pub extern fn create_signing(mg_index: c_int, parties: *const c_int, json_key: *const c_char) -> c_long {
+pub extern fn create_signing(mg_index: c_int, parties: *const c_int, json_key: *const c_char, data_to_sign: *const c_char) -> c_long {
     let mg_index: u16 = mg_index as u16;
 
     let c_int_parties: &[c_int] = unsafe {
@@ -153,7 +153,11 @@ pub extern fn create_signing(mg_index: c_int, parties: *const c_int, json_key: *
     let str_local_share: &str = c_str_local_share.to_str().unwrap();
     let string_local_share: String = str_local_share.to_owned();
 
-    crate::gg20_signing::create_signing(mg_index, u16_vec_parties, string_local_share) as c_long
+    let c_str_data_to_sign = unsafe { CStr::from_ptr(data_to_sign) };
+    let str_data_to_sign: &str = c_str_data_to_sign.to_str().unwrap();
+    let string_data_to_sign: String = str_data_to_sign.to_owned();
+
+    crate::gg20_signing::create_signing(mg_index, u16_vec_parties, string_local_share, string_data_to_sign) as c_long
 }
 
 #[no_mangle]
@@ -262,39 +266,39 @@ pub unsafe extern fn keygenCurrentRound(call_type: c_int, mpc_ptr: c_long) -> c_
     result as c_int
 }
 
-#[no_mangle]
-pub unsafe extern fn dataToSign(data_to_sign: *const c_char, offline_stage_json: *const c_char) -> *mut c_char {
-    let c_str_data_to_sign = unsafe { CStr::from_ptr(data_to_sign) };
-    let str_data_to_sign: &str = c_str_data_to_sign.to_str().unwrap();
-    let string_data_to_sign: String = str_data_to_sign.to_owned();
+// #[no_mangle]
+// pub unsafe extern fn dataToSign(data_to_sign: *const c_char, offline_stage_json: *const c_char) -> *mut c_char {
+//     let c_str_data_to_sign = unsafe { CStr::from_ptr(data_to_sign) };
+//     let str_data_to_sign: &str = c_str_data_to_sign.to_str().unwrap();
+//     let string_data_to_sign: String = str_data_to_sign.to_owned();
 
-    let c_str_offline_stage_json = unsafe { CStr::from_ptr(offline_stage_json) };
-    let str_offline_stage_json: &str = c_str_offline_stage_json.to_str().unwrap();
-    let string_offline_stage_json: String = str_offline_stage_json.to_owned();
+//     let c_str_offline_stage_json = unsafe { CStr::from_ptr(offline_stage_json) };
+//     let str_offline_stage_json: &str = c_str_offline_stage_json.to_str().unwrap();
+//     let string_offline_stage_json: String = str_offline_stage_json.to_owned();
 
-    let str_json = crate::gg20_signing::data_to_sign(string_data_to_sign, string_offline_stage_json);
+//     let str_json = crate::gg20_signing::data_to_sign(string_data_to_sign, string_offline_stage_json);
 
-    CString::new(str_json).unwrap().into_raw()
-}
+//     CString::new(str_json).unwrap().into_raw()
+// }
 
-#[no_mangle]
-pub unsafe extern fn completeSignature( data_to_sign: *const c_char, offline_stage_json: *const c_char, partial_signatures_json: *const c_char) -> *mut c_char {
-    let c_str_data_to_sign = unsafe { CStr::from_ptr(data_to_sign) };
-    let str_data_to_sign: &str = c_str_data_to_sign.to_str().unwrap();
-    let string_data_to_sign: String = str_data_to_sign.to_owned();
+// #[no_mangle]
+// pub unsafe extern fn completeSignature( data_to_sign: *const c_char, offline_stage_json: *const c_char, partial_signatures_json: *const c_char) -> *mut c_char {
+//     let c_str_data_to_sign = unsafe { CStr::from_ptr(data_to_sign) };
+//     let str_data_to_sign: &str = c_str_data_to_sign.to_str().unwrap();
+//     let string_data_to_sign: String = str_data_to_sign.to_owned();
 
-    let c_str_offline_stage_json = unsafe { CStr::from_ptr(offline_stage_json) };
-    let str_offline_stage_json: &str = c_str_offline_stage_json.to_str().unwrap();
-    let string_offline_stage_json: String = str_offline_stage_json.to_owned();
+//     let c_str_offline_stage_json = unsafe { CStr::from_ptr(offline_stage_json) };
+//     let str_offline_stage_json: &str = c_str_offline_stage_json.to_str().unwrap();
+//     let string_offline_stage_json: String = str_offline_stage_json.to_owned();
 
-    let c_str_partial_signatures_json = unsafe { CStr::from_ptr(partial_signatures_json) };
-    let str_partial_signatures_json: &str = c_str_partial_signatures_json.to_str().unwrap();
-    let string_partial_signatures_json: String = str_partial_signatures_json.to_owned();
+//     let c_str_partial_signatures_json = unsafe { CStr::from_ptr(partial_signatures_json) };
+//     let str_partial_signatures_json: &str = c_str_partial_signatures_json.to_str().unwrap();
+//     let string_partial_signatures_json: String = str_partial_signatures_json.to_owned();
 
-    let str_json = crate::gg20_signing::complete_signature(string_data_to_sign, string_offline_stage_json, string_partial_signatures_json);
+//     let str_json = crate::gg20_signing::complete_signature(string_data_to_sign, string_offline_stage_json, string_partial_signatures_json);
 
-    CString::new(str_json).unwrap().into_raw()
-}
+//     CString::new(str_json).unwrap().into_raw()
+// }
 
 #[no_mangle]
 pub extern fn rust_free(s: *mut c_char) {
