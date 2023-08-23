@@ -139,7 +139,7 @@ pub mod android {
 
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_createRefresh(mut _env: JNIEnv, _: JClass, key_json: JString, new_party_index: jint) -> jlong {
-        let jkey_json = _env.get_string(&json).expect("invalid msg_json string");
+        let jkey_json = _env.get_string(&key_json).expect("invalid msg_json string");
         let str_key_json = jkey_json.to_string_lossy();
         let string_key_json = str_key_json.to_string();
         let json_key = match string_key_json.len() {
