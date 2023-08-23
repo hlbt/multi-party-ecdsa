@@ -546,7 +546,6 @@ impl Round5 {
     ) -> Result<SignatureRecid>
     {
         let sigs = input.into_vec().into_iter().map(|s_i| s_i.0.clone()).collect::<Vec<_>>();
-        println!("Round5 === sigs.len():{}", sigs.len());
         self.local_signature
             .output_signature(&sigs)
             .map_err(Error::Round7)
