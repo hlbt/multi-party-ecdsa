@@ -126,14 +126,12 @@ pub extern fn create_keygen(index: c_int) -> c_long {
 pub extern fn create_refresh(json_key: *const c_char, new_party_index: c_int) -> c_long {
     let new_party_index: u16 = new_party_index as u16;
 
-    let json_key = match json_key.is_null() {
-        true => None,
-        false => {
-            let c_str_key = unsafe { CStr::from_ptr(json_key) };
-            let str_key: &str = c_str_key.to_str().unwrap();
-            let string_key: String = str_key.to_owned();
-            Some(string_key)
-        }
+    let c_str_key = unsafe { CStr::from_ptr(json_key) };
+    let str_key = c_str_key.to_str().unwrap();
+    let string_key = str_key.to_owned();
+    let json_key = match string_key.len() {
+        0 => None,
+        _ => Some(string_key)
     };
 
     crate::gg20_refresh::create_refresh(json_key, new_party_index, 1, 3) as c_long
