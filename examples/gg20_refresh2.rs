@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
         .run()
         .await
         .map_err(|e| anyhow!("protocol execution terminated with error: {}", e))?;
-    let output = serde_json::to_vec_pretty(&output).context("serialize output")?;
+    let output = serde_json::to_vec(&output).context("serialize output")?;
     tokio::io::copy(&mut output.as_slice(), &mut output_file)
         .await
         .context("save output to file")?;
