@@ -30,6 +30,10 @@ crate-type = ["lib"]
 #ios
 #crate-type = ["staticlib", "cdylib"]
 
+#ios 打包优化
+#[profile.release]
+#lto = true
+
 [features]
 default = ["curv-kzen/rust-gmp-kzen"]
 cclst = ["class_group"]

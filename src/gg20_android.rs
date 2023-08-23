@@ -139,13 +139,12 @@ pub mod android {
 
     #[no_mangle]
     pub unsafe extern fn Java_com_bxyz_mpc_Native_createRefresh(mut _env: JNIEnv, _: JClass, key_json: JString, new_party_index: jint) -> jlong {
-        let json_key = match Some(key_json) {
-            Some(json) => {
-                let jkey_json = _env.get_string(&json).expect("invalid msg_json string");
-                let str_key_json = jkey_json.to_string_lossy();
-                Some(str_key_json.to_string())
-            },
-            None => None
+        let jkey_json = _env.get_string(&json).expect("invalid msg_json string");
+        let str_key_json = jkey_json.to_string_lossy();
+        let string_key_json = str_key_json.to_string();
+        let json_key = match string_key_json.len() {
+            0 => None,
+            _ => Some(string_key_json)
         };
         let new_party_index = new_party_index as u16;
         crate::gg20_refresh::create_refresh(json_key, new_party_index, 1, 3) as jlong
